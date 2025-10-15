@@ -1,6 +1,7 @@
 GPPPARAMS = -m32 -fno-use-cxa-atexit -nostdlib -fno-builtin -fno-rtti -fno-exceptions -fno-leading-underscore
 ASPARAMS = --32
 LDPARAMS = -melf_i386
+VBOX_PATH = "C:\Program Files\Oracle\VirtualBox\VBoxManage.exe"
 
 objects = loader.o kernel.o
 
@@ -30,4 +31,8 @@ mykernel.iso: mykernel.bin
 	echo '	boot' >> iso/boot/grub/grub.cfg
 	echo '}' >> iso/boot/grub/grub.cfg
 	grub-mkrescue --output=$@ iso
-	rm rf iso
+	rm -rf iso
+
+# Not killing existing VM instances
+run: mykernel.iso
+	$(VBOX_PATH) startvm "Bat OS" &
