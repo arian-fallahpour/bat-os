@@ -1,9 +1,9 @@
 GPPPARAMS = -m32 -fno-use-cxa-atexit -nostdlib -fno-builtin -fno-rtti -fno-exceptions -fno-leading-underscore
 ASPARAMS = --32
 LDPARAMS = -melf_i386
-VBOX_PATH = "C:\Program Files\Oracle\VirtualBox\VBoxManage.exe"
+VBOX_PATH = /mnt/c/Program\ Files/Oracle/VirtualBox/VBoxManage.exe
 
-objects = loader.o kernel.o
+objects = loader.o port.o kernel.o
 
 
 %.o: %.cpp
@@ -36,3 +36,7 @@ mykernel.iso: mykernel.bin
 # Not killing existing VM instances
 run: mykernel.iso
 	$(VBOX_PATH) startvm "Bat OS" &
+
+.PHONY: clean
+clean:
+	rm -f $(objects) mykernel.bin mykernel.iso
