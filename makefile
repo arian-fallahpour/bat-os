@@ -4,6 +4,7 @@ LDPARAMS = -melf_i386
 VBOX_PATH = /mnt/c/Program\ Files/Oracle/VirtualBox/VBoxManage.exe
 
 objects = loader.o port.o kernel.o
+# objects = loader.o port.o interruptsubs.o interrupts.o kernel.o # add this after ep 3
 
 
 %.o: %.cpp
