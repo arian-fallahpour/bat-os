@@ -1,11 +1,15 @@
+#include "gdt.h"
+#include "interrupts.h"
 #include "types.h"
+#include "keyboard.h"
 
-void print(char* str) {
+void printf(char* str) {
   const uint8_t widthLimit = 80;   // Screen width is 80 characters on old OSes
   const uint8_t heightLimit = 25;  // Screen height is 25 lines on old OSes
   static uint8_t x = 0, y = 0;
 
-  static uint16_t* VideoMemory = (uint16_t*)0xb8000;  // Video memory begins at address 0xb8000
+  static uint16_t* VideoMemory =
+      (uint16_t*)0xb8000;  // Video memory begins at address 0xb8000
 
   for (int i = 0; str[i] != '\0'; i++) {
     switch (str[i]) {
@@ -14,8 +18,9 @@ void print(char* str) {
         y++;
         break;
       default:
-        VideoMemory[widthLimit * y + x] = (VideoMemory[widthLimit * y + x] & 0xFF00) |
-                                          str[i];  // OxFF00 black background, white text
+        VideoMemory[widthLimit * y + x] =
+            (VideoMemory[widthLimit * y + x] & 0xFF00) |
+            str[i];  // OxFF00 black background, white text
         x++;
     }
 
@@ -29,7 +34,8 @@ void print(char* str) {
     if (y >= heightLimit) {
       for (y = 0; y < heightLimit; y++) {
         for (x = 0; x < widthLimit; x++) {
-          VideoMemory[widthLimit * y + x] = (VideoMemory[widthLimit * y + x] & 0xFF00) | ' ';
+          VideoMemory[widthLimit * y + x] =
+              (VideoMemory[widthLimit * y + x] & 0xFF00) | ' ';
         }
       }
 
@@ -49,8 +55,14 @@ extern "C" void callConstructors() {
 }
 
 extern "C" void kernelMain(void* multiboot_structure, uint32_t magicnumber) {
-  print("Hello World!\nHello World!");
-  // print("Hello World!\n");
+  printf("Hello World!\nHello World!");
+
+  GlobalDescriptorTable gdt;
+  InterruptManager interruptManager(&gdt);
+
+  KeyboardDriver keyboard(&interruptManager);
+
+  interruptManager.Activate();
 
   while (1);
 };
