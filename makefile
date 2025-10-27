@@ -1,9 +1,9 @@
-GPPPARAMS = -m32 -fno-use-cxa-atexit -nostdlib -fno-builtin -fno-rtti -fno-exceptions -fno-leading-underscore
+GPPPARAMS = -m32 -fno-use-cxa-atexit -nostdlib -fno-builtin -fno-rtti -fno-exceptions -fno-leading-underscore -Wno-write-strings
 ASPARAMS = --32
 LDPARAMS = -melf_i386
 VBOX_PATH = /mnt/c/Program\ Files/Oracle/VirtualBox/VBoxManage.exe
 
-objects = loader.o gdt.o port.o interruptstubs.o interrupts.o keyboard.o kernel.o # add this after ep 3
+objects = loader.o gdt.o port.o interruptstubs.o interrupts.o keyboard.o mouse.o kernel.o # add this after ep 3
 
 
 %.o: %.cpp

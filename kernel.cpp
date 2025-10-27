@@ -2,14 +2,14 @@
 #include "interrupts.h"
 #include "types.h"
 #include "keyboard.h"
+#include "mouse.h"
 
 void printf(char* str) {
   const uint8_t widthLimit = 80;   // Screen width is 80 characters on old OSes
   const uint8_t heightLimit = 25;  // Screen height is 25 lines on old OSes
   static uint8_t x = 0, y = 0;
 
-  static uint16_t* VideoMemory =
-      (uint16_t*)0xb8000;  // Video memory begins at address 0xb8000
+  static uint16_t* VideoMemory = (uint16_t*)0xb8000;  // Video memory begins at address 0xb8000
 
   for (int i = 0; str[i] != '\0'; i++) {
     switch (str[i]) {
@@ -59,8 +59,9 @@ extern "C" void kernelMain(void* multiboot_structure, uint32_t magicnumber) {
 
   GlobalDescriptorTable gdt;
   InterruptManager interruptManager(&gdt);
-
+  
   KeyboardDriver keyboard(&interruptManager);
+  MouseDriver mouse(&interruptManager);
 
   interruptManager.Activate();
 
