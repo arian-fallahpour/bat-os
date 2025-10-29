@@ -4,6 +4,17 @@ KeyboardDriver::KeyboardDriver(InterruptManager* manager):
     InterruptHandler(0x21, manager), 
     dataport(0x60),
     commandport(0x64) {
+    
+}
+
+KeyboardDriver::~KeyboardDriver() {
+
+}
+
+void printf(char* str);
+void printfHex(uint8_t key);
+
+void KeyboardDriver::Activate() {
     while (commandport.Read() & 0x1) {
         dataport.Read();
     }
@@ -15,12 +26,6 @@ KeyboardDriver::KeyboardDriver(InterruptManager* manager):
 
     dataport.Write(0xF4); // Activate keyboard
 }
-
-KeyboardDriver::~KeyboardDriver() {
-
-}
-
-void printf(char* str);
 
 uint32_t KeyboardDriver::HandleInterrupt(uint32_t esp) {
     uint8_t key = dataport.Read();
@@ -91,11 +96,8 @@ uint32_t KeyboardDriver::HandleInterrupt(uint32_t esp) {
         
         default:
             if (key < 0x80) {
-                char* foo = "KEYBOARD 0x00\n";
-                char* hex = "0123456789ABCDEF";
-                foo[11] = hex[(key >> 4) & 0x0F];
-                foo[12] = hex[key & 0x0F];
-                printf(foo);
+                printf("KEYBOARD 0x");
+                printfHex(key);
             }
             break;
     }
