@@ -1,4 +1,8 @@
-#include "interrupts.h"
+#include <hardwarecommunication/interrupts.h>
+
+using namespace batos;
+using namespace batos::common;
+using namespace batos::hardwarecommunication;
 
 void printf(char* str);
 void printfHex(uint8_t key);
@@ -30,7 +34,7 @@ void InterruptManager::SetInterruptDescriptorTableEntry(
     uint8_t DescriptorPrivilegeLevel,
     uint8_t DescriptorType
 ) {
-    const uint8_t IDT_DESC_PRESENT = 0x80;
+    const uint8_t IDT_DESC_PRESENT = 0x80;      
 
     interruptDescriptorTable[interruptNumber].handlerAddressLowBits = ((uint32_t)handler) & 0xFFFF;
     interruptDescriptorTable[interruptNumber].handlerAddressHighBits = (((uint32_t)handler) >> 16) & 0xFFFF;

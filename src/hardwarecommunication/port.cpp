@@ -1,4 +1,7 @@
-#include "port.h"
+#include <hardwarecommunication/port.h>
+
+using namespace batos::common;
+using namespace batos::hardwarecommunication;
 
 Port::Port(uint16_t portNumber) {
     this->portNumber = portNumber;
