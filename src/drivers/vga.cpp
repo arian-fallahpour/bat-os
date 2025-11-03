@@ -61,10 +61,10 @@ void VideoGraphicsArray::WriteRegisters(uint8_t* registers) {
     attributeControllerIndexPort.Write(0x20); // Enable video output
 };
 
-bool VideoGraphicsArray::SupportsMode(int32_t width, int32_t height, int32_t colordepth) {
+bool VideoGraphicsArray::SupportsMode(uint32_t width, uint32_t height, uint32_t colordepth) {
     return width == 320 && height == 200 && colordepth == 8; // only mode we currently support
 };
-bool VideoGraphicsArray::SetMode(int32_t width, int32_t height, int32_t colordepth) {
+bool VideoGraphicsArray::SetMode(uint32_t width, uint32_t height, uint32_t colordepth) {
     if (!SupportsMode(width, height, colordepth)){
         return false;
     }
@@ -105,7 +105,7 @@ uint8_t* VideoGraphicsArray::GetFrameBufferSegment() {
     }
 };
 
-void VideoGraphicsArray::PutPixel(int32_t x, int32_t y, uint8_t colorIndex) {
+void VideoGraphicsArray::PutPixel(uint32_t x, uint32_t y, uint8_t colorIndex) {
     uint8_t* pixelAddress = GetFrameBufferSegment() + 320 * y + x;
     *pixelAddress = colorIndex;
 };
@@ -114,6 +114,14 @@ int8_t VideoGraphicsArray::GetColorIndex(uint8_t r, uint8_t g, uint8_t b) {
     if (r == 0 && g == 0 && b == 0xA8) return 0x01; // Virtual box default setting + actual hardware too
 };
 
-void VideoGraphicsArray::PutPixel(int32_t x, int32_t y, uint8_t r, uint8_t g, uint8_t b) {
+void VideoGraphicsArray::PutPixel(uint32_t x, uint32_t y, uint8_t r, uint8_t g, uint8_t b) {
     PutPixel(x, y, GetColorIndex(r, g, b));
+};
+
+void VideoGraphicsArray::FillRectangle(uint32_t x, uint32_t y, uint32_t w, uint32_t h, uint8_t r, uint8_t g, uint8_t b) {
+    for (uint32_t Y = y; Y < y + h; Y++) {
+        for (uint32_t X = x; X < x + w; X++) {
+            PutPixel(X, Y, r, g, b);
+        }
+    }
 };
