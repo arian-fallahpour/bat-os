@@ -5,7 +5,7 @@
 
 namespace batos {
     namespace common {
-        typedef GraphicsContext VideoGraphicsContext;
+        typedef batos::drivers::VideoGraphicsArray GraphicsContext;
     }
 }
 

@@ -12,7 +12,7 @@ Widget::Widget(
     int8_t r,
     int8_t g,
     int8_t b
-) {
+): KeyboardEventHandler() {
     this->parent = parent;
     this->x = x;
     this->y = y;
@@ -47,19 +47,21 @@ void Widget::Draw(GraphicsContext* gc) {
     gc->FillRectangle(X, Y, w, h, r, g, b);
 };
 
-void Widget::OnMouseDown(int32_t x, int32_t y) {
+bool Widget::ContainsCoordinate(int32_t x, int32_t y) {
+    return this->x < x && x < this->x + this->w 
+        && this->y <= y && y < this->y + this->h;
+}
+
+void Widget::OnMouseDown(int32_t x, int32_t y, uint8_t button) {
     if (isFocusable) {
         GetFocus(this);
     }
 };
 
-void Widget::OnMouseUp(int32_t x, int32_t y) {};
+
+void Widget::OnMouseUp(int32_t x, int32_t y, uint8_t button) {};
 
 void Widget::OnMouseMove(int32_t oldx, int32_t oldy, int32_t newx, int32_t newy) {};
-
-void Widget::OnKeyDown(int32_t x, int32_t y) {};
-
-void Widget::OnKeyUp(int32_t x, int32_t y) {};
 
 CompositeWidget::CompositeWidget(
     Widget* parent, 
@@ -70,7 +72,7 @@ CompositeWidget::CompositeWidget(
     batos::common::int8_t r,
     batos::common::int8_t g,
     batos::common::int8_t b
-) {};
+) : Widget(parent, x, y, w, h, r, g, b) {};
 
 CompositeWidget::~CompositeWidget() {
     focusedChild = 0;
@@ -92,19 +94,28 @@ void CompositeWidget::Draw(GraphicsContext* gc) {
     }
 };
 
-void CompositeWidget::OnMouseDown(batos::common::int32_t x, batos::common::int32_t y) {
+bool CompositeWidget::AddChild(Widget* child) {
+    if (numChildren >= 100) {
+        return false;
+    }
+
+    children[numChildren++] = child;
+    return true;
+};
+
+void CompositeWidget::OnMouseDown(batos::common::int32_t x, batos::common::int32_t y, uint8_t button) {
     for (int i = 0; i < numChildren; ++i) {
         if (children[i]->ContainsCoordinate(x - this->x, y - this->y)) {
-            children[i]->OnMouseUp(x - this->x, y - this->y);
+            children[i]->OnMouseUp(x - this->x, y - this->y, button);
             break;
         };
     }
 };
 
-void CompositeWidget::OnMouseUp(batos::common::int32_t x, batos::common::int32_t y) {
+void CompositeWidget::OnMouseUp(batos::common::int32_t x, batos::common::int32_t y, uint8_t button) {
     for (int i = 0; i < numChildren; ++i) {
         if (children[i]->ContainsCoordinate(x - this->x, y - this->y)) {
-            children[i]->OnMouseDown(x - this->x, y - this->y);
+            children[i]->OnMouseDown(x - this->x, y - this->y, button);
             break;
         };
     }
@@ -131,13 +142,13 @@ void CompositeWidget::OnMouseMove(batos::common::int32_t oldx, batos::common::in
     }
 };
 
-void CompositeWidget::OnKeyDown(char* str) {
+void CompositeWidget::OnKeyDown(char str) {
     if (focusedChild != 0) {
         focusedChild->OnKeyDown(str);
     }
 };
 
-void CompositeWidget::OnKeyUp(char* str) {
+void CompositeWidget::OnKeyUp(char str) {
     if (focusedChild != 0) {
         focusedChild->OnKeyDown(str);
     }

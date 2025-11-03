@@ -31,8 +31,8 @@ namespace batos {
                 
                 virtual bool SupportsMode(batos::common::uint32_t width, batos::common::uint32_t height, batos::common::uint32_t colordepth);
                 virtual bool SetMode(batos::common::uint32_t width, batos::common::uint32_t height, batos::common::uint32_t colordepth);
-                virtual void PutPixel(batos::common::uint32_t x, batos::common::uint32_t y, batos::common::uint8_t r, batos::common::uint8_t g, batos::common::uint8_t b);
-                virtual void PutPixel(batos::common::uint32_t x, batos::common::uint32_t y, batos::common::uint8_t colorIndex);
+                virtual void PutPixel(batos::common::int32_t x, batos::common::int32_t y, batos::common::uint8_t r, batos::common::uint8_t g, batos::common::uint8_t b);
+                virtual void PutPixel(batos::common::int32_t x, batos::common::int32_t y, batos::common::uint8_t colorIndex);
                 
                 virtual void FillRectangle(batos::common::uint32_t x, batos::common::uint32_t y, batos::common::uint32_t w, batos::common::uint32_t h, batos::common::uint8_t r, batos::common::uint8_t g, batos::common::uint8_t b);
         };

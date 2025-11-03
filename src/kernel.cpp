@@ -6,11 +6,16 @@
 #include <drivers/keyboard.h>
 #include <drivers/mouse.h>
 #include <drivers/vga.h>
+#include <gui/desktop.h>
+#include <gui/window.h>
+
+// #define GRAPHICSMODE
 
 using namespace batos;
 using namespace batos::common;
 using namespace batos::drivers;
 using namespace batos::hardwarecommunication;
+using namespace batos::gui;
 
 void printf(char* str) {
   const uint8_t widthLimit = 80;   // Screen width is 80 characters on old OSes
@@ -119,14 +124,22 @@ extern "C" void kernelMain(void* multiboot_structure, uint32_t magicnumber) {
   InterruptManager interruptManager(&gdt);
   
   printf("Initializing Hardware, Stage 1\n");
+
+  Desktop desktop(320, 200, 0x00, 0x00, 0xA8);
   DriverManager drvManager;
   
-  PrintfKeyboardEventHandler kbhandler;
-  KeyboardDriver keyboard(&interruptManager, &kbhandler);
-  drvManager.addDriver(&keyboard);
-  
-  MouseToConsole mousehandler;
-  MouseDriver mouse(&interruptManager, &mousehandler);
+  // PrintfKeyboardEventHandler kbhandler;
+  // KeyboardDriver keyboard(&interruptManager, &kbhandler);
+#ifdef GRAPHICSMODE
+KeyboardDriver keyboard(&interruptManager, &desktop); // attach keyboard to desktop
+#endif
+drvManager.addDriver(&keyboard);
+
+// MouseToConsole mousehandler;
+// MouseDriver mouse(&interruptManager, &mousehandler);
+#ifdef GRAPHICSMODE
+MouseDriver mouse(&interruptManager, &desktop); // attach mouse to desktop
+#endif
   drvManager.addDriver(&mouse);
 
   PeripheralComponentInterconnectController PCIController;
@@ -139,11 +152,17 @@ extern "C" void kernelMain(void* multiboot_structure, uint32_t magicnumber) {
   drvManager.ActivateAll();
   
   printf("Initializing Hardware, Stage 3\n");
-  interruptManager.Activate();
-
-  vga.SetMode(320, 200, 8);
   
-  vga.FillRectangle(0, 0, 320, 200, 0x00, 0x00, 0xA8); // blue 
+  vga.SetMode(320, 200, 8);
 
-  while (1);
+  Window win1(&desktop, 10, 10, 20, 20, 0xA8, 0x00, 0x00);
+  desktop.AddChild(&win1);
+  Window win2(&desktop, 40, 15, 30, 30, 0x00, 0xA8, 0x00);
+  desktop.AddChild(&win2);
+  
+  interruptManager.Activate();
+  
+  while (1) {
+    desktop.Draw(&vga); // not a good idea bc of multitasking later
+  }
 };
