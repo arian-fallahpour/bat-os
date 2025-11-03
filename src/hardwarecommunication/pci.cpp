@@ -149,8 +149,8 @@ Driver* PeripheralComponentInterconnectController::GetDriver(
     switch (dev.vendor_id) {
         case 0x1022: // AMD
             switch (dev.device_id) {
-                case 0xc2000: // ma79c973
-                    printf("AMD amd79c973\n");
+                case 0x2000: // am79c973
+                    printf("AMD am79c973\n");
                     break;
                     // return new AMDDriver(...); 
                 }
