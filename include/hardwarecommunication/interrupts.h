@@ -1,9 +1,10 @@
 #ifndef __BATOS__HARDWARECOMMUNICATION__INTERRUPTS_H
 #define __BATOS__HARDWARECOMMUNICATION__INTERRUPTS_H
 
+#include <gdt.h>
+#include <multitasking.h>
 #include <common/types.h>
 #include <hardwarecommunication/port.h>
-#include <gdt.h>
 
 namespace batos {
   namespace hardwarecommunication {
@@ -27,6 +28,8 @@ namespace batos {
     protected:
       static InterruptManager* ActiveInterruptManager;
       batos::hardwarecommunication::InterruptHandler* handlers[256];
+      batos::common::uint16_t hardwareInterruptOffset;
+      batos::multitasking::TaskManager* taskManager;
 
       struct GateDescriptor {
         batos::common::uint16_t handlerAddressLowBits;
@@ -57,8 +60,14 @@ namespace batos {
       batos::hardwarecommunication::Port8BitSlow picSlaveData;
 
     public:
-      InterruptManager(GlobalDescriptorTable* gdt);
+      InterruptManager(
+        batos::common::uint16_t hardwareInterruptOffset,
+        GlobalDescriptorTable* gdt,
+        batos::multitasking::TaskManager* taskManager
+      );
       ~InterruptManager();
+
+      batos::common::uint16_t HardwareInterruptOffset();
 
       void Activate();
       void Deactivate();

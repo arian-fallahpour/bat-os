@@ -3,6 +3,7 @@
 using namespace batos;
 using namespace batos::common;
 using namespace batos::hardwarecommunication;
+using namespace batos::multitasking;
 
 void printf(char* str);
 void printfHex(uint8_t key);
@@ -15,7 +16,7 @@ InterruptHandler::InterruptHandler(uint8_t interruptNumber, InterruptManager* in
 
 InterruptHandler::~InterruptHandler() {
     if (interruptManager->handlers[interruptNumber] == this) {
-        interruptManager->handlers[interruptNumber] = this;
+        interruptManager->handlers[interruptNumber] = 0;
     }
 }
 
@@ -43,11 +44,18 @@ void InterruptManager::SetInterruptDescriptorTableEntry(
     interruptDescriptorTable[interruptNumber].reserved = 0;
 }
 
-InterruptManager::InterruptManager(GlobalDescriptorTable* gdt): 
+InterruptManager::InterruptManager(        
+    uint16_t hardwareInterruptOffset,
+    GlobalDescriptorTable* gdt,
+    TaskManager* taskManager
+): 
     picMasterCommand(0x20),
     picMasterData(0x21),
     picSlaveCommand(0xA0),
     picSlaveData(0xA1){
+
+    this->taskManager = taskManager;
+    this->hardwareInterruptOffset = hardwareInterruptOffset;
     uint16_t CodeSegment = gdt->CodeSegmentSelector();
     const uint8_t IDT_INTERRIPT_GATE = 0xE;
 
@@ -56,15 +64,15 @@ InterruptManager::InterruptManager(GlobalDescriptorTable* gdt):
         SetInterruptDescriptorTableEntry(i, CodeSegment, &IgnoreInterruptRequest, 0, IDT_INTERRIPT_GATE); // Set to ignore all by default
     }
 
-    SetInterruptDescriptorTableEntry(0x20, CodeSegment, &HandleInterruptRequest0x00, 0, IDT_INTERRIPT_GATE); // wired from HandleInterruptRequest0x00 in ASM (0x20 + 0x00 = 0x20)
-    SetInterruptDescriptorTableEntry(0x21, CodeSegment, &HandleInterruptRequest0x01, 0, IDT_INTERRIPT_GATE); // wired from HandleInterruptRequest0x01 in ASM (0x20 + 0x01 = 0x21)
-    SetInterruptDescriptorTableEntry(0x2C, CodeSegment, &HandleInterruptRequest0x0C, 0, IDT_INTERRIPT_GATE); // wired from HandleInterruptRequest0x01 in ASM (0x20 + 0x01 = 0x21)
+    SetInterruptDescriptorTableEntry(hardwareInterruptOffset + 0x00, CodeSegment, &HandleInterruptRequest0x00, 0, IDT_INTERRIPT_GATE); // wired from HandleInterruptRequest0x00 in ASM (0x20 + 0x00 = 0x20)
+    SetInterruptDescriptorTableEntry(hardwareInterruptOffset + 0x01, CodeSegment, &HandleInterruptRequest0x01, 0, IDT_INTERRIPT_GATE); // wired from HandleInterruptRequest0x01 in ASM (0x20 + 0x01 = 0x21)
+    SetInterruptDescriptorTableEntry(hardwareInterruptOffset + 0x0C, CodeSegment, &HandleInterruptRequest0x0C, 0, IDT_INTERRIPT_GATE); // wired from HandleInterruptRequest0x01 in ASM (0x20 + 0x01 = 0x21)
 
     picMasterCommand.Write(0x11); // Initialize PIC
     picSlaveCommand.Write(0x11);
 
-    picMasterData.Write(0x20); // Remap PIC
-    picSlaveData.Write(0x28);
+    picMasterData.Write(hardwareInterruptOffset); // Remap PIC
+    picSlaveData.Write(hardwareInterruptOffset + 8);
 
     picMasterData.Write(0x04); // Setup cascading
     picSlaveData.Write(0x02);
@@ -81,7 +89,13 @@ InterruptManager::InterruptManager(GlobalDescriptorTable* gdt):
     asm volatile("lidt %0" : : "m" (idt));    
 }
 
-InterruptManager::~InterruptManager() {}
+InterruptManager::~InterruptManager() {
+    Deactivate();
+}
+
+uint16_t InterruptManager::HardwareInterruptOffset() {
+    return hardwareInterruptOffset;
+}
 
 void InterruptManager::Activate() {
     if (ActiveInterruptManager != 0){
@@ -102,23 +116,26 @@ void InterruptManager::Deactivate() {
 
 uint32_t InterruptManager::handleInterrupt(uint8_t interruptNumber, uint32_t esp) {
     if (ActiveInterruptManager != 0) {
-        ActiveInterruptManager->DoHandleInterrupt(interruptNumber, esp);
+        return ActiveInterruptManager->DoHandleInterrupt(interruptNumber, esp);
     }
-    
     return esp;
 }
 
 uint32_t InterruptManager::DoHandleInterrupt(uint8_t interruptNumber, uint32_t esp) {
     if (handlers[interruptNumber] != 0) {
         esp = handlers[interruptNumber]->HandleInterrupt(esp);
-    } else if (interruptNumber != 0x20) {
+    } else if (interruptNumber != hardwareInterruptOffset) {
         printf("UNHANDLED INTERRUPT");
         printfHex(interruptNumber);
     }
 
-    if (0x20 <= interruptNumber && interruptNumber < 0x30) {
+    if (interruptNumber == hardwareInterruptOffset) {
+        esp = (uint32_t)taskManager->Schedule((CPUState*)esp);
+    }
+
+    if (hardwareInterruptOffset <= interruptNumber && interruptNumber < hardwareInterruptOffset + 16) {
         picMasterCommand.Write(0x20);
-        if (0x28 <= interruptNumber) {
+        if (hardwareInterruptOffset + 8 <= interruptNumber) {
             picSlaveCommand.Write(0x20);  // Send EOI to slave PIC
         }
     }

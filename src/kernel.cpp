@@ -8,6 +8,7 @@
 #include <drivers/vga.h>
 #include <gui/desktop.h>
 #include <gui/window.h>
+#include <multitasking.h> 
 
 // #define GRAPHICSMODE
 
@@ -16,6 +17,7 @@ using namespace batos::common;
 using namespace batos::drivers;
 using namespace batos::hardwarecommunication;
 using namespace batos::gui;
+using namespace batos::multitasking;
 
 void printf(char* str) {
   const uint8_t widthLimit = 80;   // Screen width is 80 characters on old OSes
@@ -108,6 +110,18 @@ class MouseToConsole : public MouseEventHandler {
     }
 };
 
+void taskA() {
+  while (true) {
+    printf("A");
+  }
+}
+
+void taskB() {
+  while (true) {
+    printf("B");
+  }
+}
+
 typedef void (*constructor)();
 extern "C" constructor start_ctors;
 extern "C" constructor end_ctors;
@@ -121,48 +135,66 @@ extern "C" void kernelMain(void* multiboot_structure, uint32_t magicnumber) {
   printf("Hello World!\nHello World!");
   
   GlobalDescriptorTable gdt;
-  InterruptManager interruptManager(&gdt);
+  
+  TaskManager taskManager;
+  Task task1(&gdt, taskA);
+  Task task2(&gdt, taskB);
+  // taskManager.AddTask(&task1);
+  // taskManager.AddTask(&task2);
+
+  InterruptManager interruptManager(0x20, &gdt, &taskManager);
   
   printf("Initializing Hardware, Stage 1\n");
 
+#ifdef GRAPHICSMODE
   Desktop desktop(320, 200, 0x00, 0x00, 0xA8);
+#endif
+
   DriverManager drvManager;
   
-  // PrintfKeyboardEventHandler kbhandler;
-  // KeyboardDriver keyboard(&interruptManager, &kbhandler);
 #ifdef GRAPHICSMODE
-KeyboardDriver keyboard(&interruptManager, &desktop); // attach keyboard to desktop
+  KeyboardDriver keyboard(&interruptManager, &desktop); // attach keyboard to desktop
+#else
+  PrintfKeyboardEventHandler kbhandler;
+  KeyboardDriver keyboard(&interruptManager, &kbhandler);
 #endif
-drvManager.addDriver(&keyboard);
+  drvManager.addDriver(&keyboard);
 
-// MouseToConsole mousehandler;
-// MouseDriver mouse(&interruptManager, &mousehandler);
+
 #ifdef GRAPHICSMODE
-MouseDriver mouse(&interruptManager, &desktop); // attach mouse to desktop
+  MouseDriver mouse(&interruptManager, &desktop); // attach mouse to desktop
+#else
+  MouseToConsole mousehandler;
+  MouseDriver mouse(&interruptManager, &mousehandler);
 #endif
   drvManager.addDriver(&mouse);
 
   PeripheralComponentInterconnectController PCIController;
   PCIController.SelectDrivers(&drvManager, &interruptManager);
 
+#ifdef GRAPHICSMODE
   VideoGraphicsArray vga;
-
+#endif
   
   printf("Initializing Hardware, Stage 2\n");
   drvManager.ActivateAll();
   
   printf("Initializing Hardware, Stage 3\n");
-  
+
+#ifdef GRAPHICSMODE
   vga.SetMode(320, 200, 8);
 
   Window win1(&desktop, 10, 10, 20, 20, 0xA8, 0x00, 0x00);
   desktop.AddChild(&win1);
   Window win2(&desktop, 40, 15, 30, 30, 0x00, 0xA8, 0x00);
   desktop.AddChild(&win2);
+#endif
   
   interruptManager.Activate();
   
   while (1) {
+#ifdef GRAPHICSMODE
     desktop.Draw(&vga); // not a good idea bc of multitasking later
+#endif
   }
 };

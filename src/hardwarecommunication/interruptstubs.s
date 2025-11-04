@@ -17,8 +17,13 @@ _ZN5batos21hardwarecommunication16InterruptManager16HandleException\num\()Ev:
 .global _ZN5batos21hardwarecommunication16InterruptManager26HandleInterruptRequest\num\()Ev
 _ZN5batos21hardwarecommunication16InterruptManager26HandleInterruptRequest\num\()Ev:
     movb $\num + IRQ_BASE, (interruptnumber)
+    pushl $0
     jmp int_bottom
 .endm
+
+HandleException 0x00
+HandleException 0x01
+HandleException 0x0C
 
 HandleInterruptRequest 0x00
 HandleInterruptRequest 0x01
@@ -26,23 +31,44 @@ HandleInterruptRequest 0x0C
 
 int_bottom:
 
-    pusha
-    pushl %ds
-    pushl %es
-    pushl %fs
-    pushl %gs
+    # pusha
+    # pushl %ds
+    # pushl %es
+    # pushl %fs
+    # pushl %gs
 
+    pushl %ebp
+    pushl %edi
+    pushl %esi
+
+    pushl %edx
+    pushl %ecx
+    pushl %ebx
+    pushl %eax
+
+    # Call the C++ interrupt handler
     push %esp
     push (interruptnumber)
     call _ZN5batos21hardwarecommunication16InterruptManager15handleInterruptEhj
     # addl $5, %esp
-    movl %eax, %esp
+    movl %eax, %esp # Switch the stack
 
-    popl %gs
-    popl %fs
-    popl %es
-    popl %ds
-    popa
+    popl %eax
+    popl %ebx
+    popl %ecx
+    popl %edx
+
+    popl %esi
+    popl %edi
+    popl %ebp
+
+    # popl %gs
+    # popl %fs
+    # popl %es
+    # popl %ds
+    # popa
+
+    add $4, %esp
 
 .global _ZN5batos21hardwarecommunication16InterruptManager22IgnoreInterruptRequestEv
 _ZN5batos21hardwarecommunication16InterruptManager22IgnoreInterruptRequestEv:
