@@ -6,6 +6,7 @@
 #include <common/types.h>
 #include <hardwarecommunication/port.h>
 
+
 namespace batos {
   namespace hardwarecommunication {
     class InterruptManager;

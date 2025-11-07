@@ -144,12 +144,17 @@ Driver* PeripheralComponentInterconnectController::GetDriver(
     PeripheralComponentInterconnectDeviceDescriptor dev, 
     batos::hardwarecommunication::InterruptManager* interrupts
 ) {
+    Driver* driver = 0;
 
     // We are hard coding drivers into kernel because we don't have access to harddrive yet
     switch (dev.vendor_id) {
         case 0x1022: // AMD
             switch (dev.device_id) {
                 case 0x2000: // am79c973
+                    // driver = (amd_am79c973*)MemoryManager::activeMemoryManager->malloc(sizeof(amd_am79c973));
+                    // if (driver != 0) {
+                    //     new (driver) amd_am79c973(...);
+                    // }
                     printf("AMD am79c973\n");
                     break;
                     // return new AMDDriver(...); 
@@ -169,7 +174,7 @@ Driver* PeripheralComponentInterconnectController::GetDriver(
             break;
     }
 
-    return 0;
+    return driver;
 };
 
 PeripheralComponentInterconnectDeviceDescriptor PeripheralComponentInterconnectController::GetDeviceDescriptor(
