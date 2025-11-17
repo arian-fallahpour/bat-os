@@ -25,7 +25,6 @@ namespace batos {
                 Port8BitSlow(batos::common::uint16_t portNumber);
                 ~Port8BitSlow();
                 virtual void Write(batos::common::uint8_t data);
-
         };
 
         class Port16Bit : public Port {
@@ -43,7 +42,7 @@ namespace batos {
                 virtual void Write(batos::common::uint32_t data);
                 virtual batos::common::uint32_t Read();
         };
-    }
-};
+    }  // namespace hardwarecommunication
+};  // namespace batos
 
 #endif

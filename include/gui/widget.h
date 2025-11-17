@@ -1,12 +1,11 @@
 #ifndef __BATOS__GUI__WIDGET_H
 #define __BATOS__GUI__WIDGET_H
 
-#include <common/types.h>
 #include <common/graphicscontext.h>
+#include <common/types.h>
 #include <drivers/keyboard.h>
 
-namespace batos
-{
+namespace batos {
     namespace gui {
         class Widget : public batos::drivers::KeyboardEventHandler {
             protected:
@@ -19,7 +18,7 @@ namespace batos
 
             public:
                 Widget(
-                    Widget* parent, 
+                    Widget* parent,
                     batos::common::int32_t x,
                     batos::common::int32_t y,
                     batos::common::int32_t w,
@@ -31,24 +30,43 @@ namespace batos
                 ~Widget();
 
                 virtual void GetFocus(Widget* widget);
-                virtual void MovelToScreen(batos::common::int32_t &x, batos::common::int32_t &y);
-                virtual bool ContainsCoordinate(batos::common::int32_t x, batos::common::int32_t y);
+                virtual void MovelToScreen(
+                    batos::common::int32_t& x,
+                    batos::common::int32_t& y
+                );
+                virtual bool ContainsCoordinate(
+                    batos::common::int32_t x,
+                    batos::common::int32_t y
+                );
 
                 virtual void Draw(batos::common::GraphicsContext* gc);
-                virtual void OnMouseDown(batos::common::int32_t x, batos::common::int32_t y, batos::common::uint8_t button);
-                virtual void OnMouseUp(batos::common::int32_t x, batos::common::int32_t y, batos::common::uint8_t button);
-                virtual void OnMouseMove(batos::common::int32_t oldx, batos::common::int32_t oldy, batos::common::int32_t newx, batos::common::int32_t newy);
+                virtual void OnMouseDown(
+                    batos::common::int32_t x,
+                    batos::common::int32_t y,
+                    batos::common::uint8_t button
+                );
+                virtual void OnMouseUp(
+                    batos::common::int32_t x,
+                    batos::common::int32_t y,
+                    batos::common::uint8_t button
+                );
+                virtual void OnMouseMove(
+                    batos::common::int32_t oldx,
+                    batos::common::int32_t oldy,
+                    batos::common::int32_t newx,
+                    batos::common::int32_t newy
+                );
         };
 
         class CompositeWidget : public Widget {
-            private: 
+            private:
                 Widget* children[100];
                 int numChildren;
                 Widget* focusedChild;
 
             public:
                 CompositeWidget(
-                    Widget* parent, 
+                    Widget* parent,
                     batos::common::int32_t x,
                     batos::common::int32_t y,
                     batos::common::int32_t w,
@@ -63,15 +81,27 @@ namespace batos
                 virtual bool AddChild(Widget* child);
 
                 virtual void Draw(batos::common::GraphicsContext* gc);
-                virtual void OnMouseDown(batos::common::int32_t x, batos::common::int32_t y, batos::common::uint8_t button);
-                virtual void OnMouseUp(batos::common::int32_t x, batos::common::int32_t y, batos::common::uint8_t button);
-                virtual void OnMouseMove(batos::common::int32_t oldx, batos::common::int32_t oldy, batos::common::int32_t newx, batos::common::int32_t newy);
+                virtual void OnMouseDown(
+                    batos::common::int32_t x,
+                    batos::common::int32_t y,
+                    batos::common::uint8_t button
+                );
+                virtual void OnMouseUp(
+                    batos::common::int32_t x,
+                    batos::common::int32_t y,
+                    batos::common::uint8_t button
+                );
+                virtual void OnMouseMove(
+                    batos::common::int32_t oldx,
+                    batos::common::int32_t oldy,
+                    batos::common::int32_t newx,
+                    batos::common::int32_t newy
+                );
 
                 virtual void OnKeyDown(char);
                 virtual void OnKeyUp(char);
         };
-    };
-} // namespace batos
-
+    };  // namespace gui
+}  // namespace batos
 
 #endif

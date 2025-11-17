@@ -4,7 +4,7 @@
 namespace batos {
     namespace drivers {
         class Driver {
-            public:    
+            public:
                 Driver();
                 ~Driver();
 
@@ -17,17 +17,14 @@ namespace batos {
             private:
                 batos::drivers::Driver* drivers[256];
                 int numDrivers;
+
             public:
                 DriverManager();
                 void addDriver(batos::drivers::Driver*);
 
                 void ActivateAll();
         };
-    }
-};
-
-
-
-
+    }  // namespace drivers
+};  // namespace batos
 
 #endif

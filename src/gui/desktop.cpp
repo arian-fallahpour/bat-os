@@ -5,12 +5,13 @@ using namespace batos::common;
 using namespace batos::gui;
 
 Desktop::Desktop(
-    batos::common::int32_t w, 
+    batos::common::int32_t w,
     batos::common::int32_t h,
     batos::common::uint8_t r,
     batos::common::uint8_t g,
     batos::common::uint8_t b
-): CompositeWidget(0, 0, 0, w, h, r, g, b), MouseEventHandler() {
+)
+    : CompositeWidget(0, 0, 0, w, h, r, g, b), MouseEventHandler() {
     MouseX = w / 2;
     MouseY = h / 2;
 };
@@ -44,7 +45,7 @@ void Desktop::OnMouseMove(batos::common::int8_t x, batos::common::int8_t y) {
     int32_t newMouseX = MouseX + x;
     if (newMouseX < 0) newMouseX = 0;
     if (newMouseX >= w) newMouseX = w - 1;
-    
+
     int32_t newMouseY = MouseY + y;
     if (newMouseY < 0) newMouseY = 0;
     if (newMouseY >= h) newMouseY = h - 1;

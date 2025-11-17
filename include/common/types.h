@@ -13,7 +13,7 @@ namespace batos {
         typedef unsigned long long int uint64_t;
         typedef const char* string;
         typedef uint32_t size_t;
-    }
-};
+    }  // namespace common
+};  // namespace batos
 
 #endif

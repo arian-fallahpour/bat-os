@@ -15,7 +15,7 @@ Task::Task(GlobalDescriptorTable* gdt, void entrypoint()) {
     cpustate->esi = 0;
     cpustate->edi = 0;
     cpustate->ebp = 0;
-    
+
     // cpustate->gs = 0;
     // cpustate->fs = 0;
     // cpustate->es = 0;
@@ -35,7 +35,6 @@ Task::~Task() {};
 TaskManager::TaskManager() {
     numTasks = 0;
     currentTask = -1;
-
 };
 
 TaskManager::~TaskManager() {};
@@ -43,7 +42,7 @@ TaskManager::~TaskManager() {};
 bool TaskManager::AddTask(Task* task) {
     if (numTasks >= 256) {
         return false;
-    } 
+    }
 
     tasks[numTasks++] = task;
     return true;

@@ -8,16 +8,15 @@ KeyboardEventHandler::KeyboardEventHandler() {};
 void KeyboardEventHandler::OnKeyDown(char c) {}
 void KeyboardEventHandler::OnKeyUp(char c) {}
 
-KeyboardDriver::KeyboardDriver(InterruptManager* manager, KeyboardEventHandler* handler): 
-    InterruptHandler(0x21, manager), 
-    dataport(0x60),
-    commandport(0x64) {
+KeyboardDriver::KeyboardDriver(
+    InterruptManager* manager,
+    KeyboardEventHandler* handler
+)
+    : InterruptHandler(0x21, manager), dataport(0x60), commandport(0x64) {
     this->handler = handler;
 }
 
-KeyboardDriver::~KeyboardDriver() {
-
-}
+KeyboardDriver::~KeyboardDriver() {}
 
 void printf(char* str);
 void printfHex(uint8_t key);
@@ -26,13 +25,13 @@ void KeyboardDriver::Activate() {
     while (commandport.Read() & 0x1) {
         dataport.Read();
     }
-    commandport.Write(0xAE); // Start sending keyboards interrupts
-    commandport.Write(0x20); // Command 0x20 = read controller command byte
+    commandport.Write(0xAE);  // Start sending keyboards interrupts
+    commandport.Write(0x20);  // Command 0x20 = read controller command byte
     uint8_t status = (dataport.Read() | 1) & ~0x10;
-    commandport.Write(0x60); // Change state
+    commandport.Write(0x60);  // Change state
     dataport.Write(status);
 
-    dataport.Write(0xF4); // Activate keyboard
+    dataport.Write(0xF4);  // Activate keyboard
 }
 
 uint32_t KeyboardDriver::HandleInterrupt(uint32_t esp) {
@@ -43,12 +42,13 @@ uint32_t KeyboardDriver::HandleInterrupt(uint32_t esp) {
 
     static bool Shift = false;
 
-
     // Note: On different keyboards/scancodesets, these values may differ
-    // Key pressed   
+    // Key pressed
     switch (key) {
-        case 0xFA: break; // ACK
+        case 0xFA:
+            break;  // ACK
 
+            // clang-format off
         case 0x02: handler->OnKeyDown(!Shift ? '1' : '!'); break;
         case 0x03: handler->OnKeyDown(!Shift ? '2' : '@'); break;
         case 0x04: handler->OnKeyDown(!Shift ? '3' : '#'); break;
@@ -105,7 +105,8 @@ uint32_t KeyboardDriver::HandleInterrupt(uint32_t esp) {
 
         case 0x45: // Num Lock
         case 0xC5: break;
-        
+
+        // clang-format on
         default:
             if (key < 0x80) {
                 printf("KEYBOARD 0x");

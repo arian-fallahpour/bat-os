@@ -11,7 +11,7 @@ MemoryManager::MemoryManager(size_t start, size_t size) {
 
     if (size < sizeof(MemoryChunk)) {
         first = 0;
-    } else {   
+    } else {
         first = (MemoryChunk*)start;
 
         first->allocated = false;
@@ -28,9 +28,10 @@ MemoryManager::~MemoryManager() {
 };
 
 void* MemoryManager::malloc(size_t size) {
-    MemoryChunk *result = 0;
+    MemoryChunk* result = 0;
 
-    for (MemoryChunk* chunk = first; chunk != 0 && result == 0; chunk = chunk->next) {
+    for (MemoryChunk* chunk = first; chunk != 0 && result == 0;
+         chunk = chunk->next) {
         if (chunk->size > size && !chunk->allocated) {
             result = chunk;
             break;
@@ -42,7 +43,8 @@ void* MemoryManager::malloc(size_t size) {
     }
 
     if (result->size >= size + sizeof(MemoryChunk) + 1) {
-        MemoryChunk* temp = (MemoryChunk*)((size_t)result + sizeof(MemoryChunk) + size);
+        MemoryChunk* temp
+            = (MemoryChunk*)((size_t)result + sizeof(MemoryChunk) + size);
 
         temp->allocated = false;
         temp->size = result->size - size - sizeof(MemoryChunk);
@@ -95,25 +97,18 @@ void* operator new[](unsigned size) {
     if (batos::MemoryManager::activeMemoryManager == 0) {
         return 0;
     }
-    
+
     return batos::MemoryManager::activeMemoryManager->malloc(size);
-
 };
 
-void* operator new(unsigned size, void* ptr) {
-    return ptr;
-};
+void* operator new(unsigned size, void* ptr) { return ptr; };
 
-void* operator new[](unsigned size, void* ptr) {
-    return ptr;
-
-};
+void* operator new[](unsigned size, void* ptr) { return ptr; };
 
 void operator delete(void* ptr) {
     if (batos::MemoryManager::activeMemoryManager != 0) {
         batos::MemoryManager::activeMemoryManager->free(ptr);
     }
-
 };
 
 void operator delete[](void* ptr) {
