@@ -65,10 +65,8 @@ namespace batos {
                     batos::common::uint16_t value
                 );
 
-                bool DeviceHasFunctions(
-                    batos::common::uint16_t bus,
-                    batos::common::uint16_t device
-                );
+                bool
+                DeviceHasFunctions(batos::common::uint16_t bus, batos::common::uint16_t device);
 
                 void SelectDrivers(
                     batos::drivers::DriverManager* driverManager,
@@ -78,8 +76,7 @@ namespace batos {
                     PeripheralComponentInterconnectDeviceDescriptor dev,
                     batos::hardwarecommunication::InterruptManager* interrupts
                 );
-                PeripheralComponentInterconnectDeviceDescriptor
-                GetDeviceDescriptor(
+                PeripheralComponentInterconnectDeviceDescriptor GetDeviceDescriptor(
                     batos::common::uint16_t bus,
                     batos::common::uint16_t device,
                     batos::common::uint16_t function
