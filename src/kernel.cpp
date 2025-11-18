@@ -149,7 +149,7 @@ extern "C" void callConstructors() {
 }
 
 extern "C" void kernelMain(void* multiboot_structure, uint32_t magicnumber) {
-    printf("Hello World!\nHello World!");
+    printf("Initializing BatOS\n");
 
     GlobalDescriptorTable gdt;
 
@@ -217,6 +217,7 @@ extern "C" void kernelMain(void* multiboot_structure, uint32_t magicnumber) {
 
     printf("Initializing Hardware, Stage 2\n");
     drvManager.ActivateAll();
+    printf("Drivers Activated\n");
 
     printf("Initializing Hardware, Stage 3\n");
 
@@ -230,6 +231,7 @@ extern "C" void kernelMain(void* multiboot_structure, uint32_t magicnumber) {
 #endif
 
     interruptManager.Activate();
+    printf("Interrupt Manager Activated\n");
 
     while (1) {
 #ifdef GRAPHICSMODE
