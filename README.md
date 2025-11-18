@@ -2,6 +2,7 @@
 
 This is a simple operating system with the following functionality:
 
+- Display text to Terminal Mode using Video Memory memory buffer
 - Ports that abstract communication to CPU using `IN/OUT` assembly instructions
 - A Global Descriptor Table (GDT) containing information about memory segments for the CPU
 - Interrupt management using Programmable Interrupt Controller (PIC) to handle inputs coming from external devices (keyboard, mouse)
